@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="测试计划" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="用户定义的变量" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="用户全局变量" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="ip" elementType="Argument">
+            <stringProp name="Argument.name">ip</stringProp>
+            <stringProp name="Argument.value">27.38.157.21</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">检测的ip</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="测试ping计划" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="循环控制器" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time"></stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP信息头管理器" enabled="true">
+          <collectionProp name="HeaderManager.headers"/>
+        </HeaderManager>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="请求token" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="用户定义的变量" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">ping.chinaz.com</stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/${ip}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath提取器" enabled="true">
+            <stringProp name="XPathExtractor.default"></stringProp>
+            <stringProp name="XPathExtractor.refname">guid</stringProp>
+            <stringProp name="XPathExtractor.matchNumber">-1</stringProp>
+            <stringProp name="XPathExtractor.xpathQuery">/html/body/div[@id=&apos;result-list&apos;]/div[@id=&apos;speedlist&apos;]/div[@class=&apos;row listw tc clearfix&apos;]/@id</stringProp>
+            <boolProp name="XPathExtractor.validate">false</boolProp>
+            <boolProp name="XPathExtractor.tolerant">true</boolProp>
+            <boolProp name="XPathExtractor.namespace">false</boolProp>
+            <boolProp name="XPathExtractor.fragment">true</boolProp>
+          </XPathExtractor>
+          <hashTree/>
+          <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="BeanShell 后置处理程序" enabled="true">
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <boolProp name="resetInterpreter">false</boolProp>
+            <stringProp name="script">import org.apache.jmeter.samplers.SampleResult;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import us.codecraft.xsoup.Xsoup;
+import java.util.*;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.io.*;
+import org.apache.commons.lang3.StringUtils;
+
+
+
+public static void xping(){
+	String html = prev.getResponseDataAsString();
+	
+	Document document = Jsoup.parse(html);
+	
+	String xpath_id = &quot;/html/body/div[@id=&apos;result-list&apos;]/div[@id=&apos;speedlist&apos;]/div[@class=&apos;row listw tc clearfix&apos;]/@id&quot;;
+	String xpath_city =&quot;/html/body/div[@id=&apos;result-list&apos;]/div[@id=&apos;speedlist&apos;]/div[@class=&apos;row listw tc clearfix&apos;]/div[@name=&apos;city&apos;]/text()&quot;;
+	String enkey =&quot;//input[@id=&apos;enkey&apos;]/@value&quot;;
+	String ishost =&quot;//input[@id=&apos;ishost&apos;]/@value&quot;;
+	String issubhost =&quot;//input[@id=&apos;issubhost&apos;]/@value&quot;;
+	String isipv6 =&quot;//input[@id=&apos;isipv6&apos;]/@value&quot;;
+	String checktype =&quot;//input[@id=&apos;checktype&apos;]/@value&quot;;
+	String slen =&quot;//input[@id=&apos;slen&apos;]/@value&quot;;
+	String ftype =&quot;//input[@id=&apos;ftype&apos;]/@value&quot;;
+	String enabled =&quot;//input[@id=&apos;enabled&apos;]/@value&quot;;
+	
+	List list_id = Xsoup.compile(xpath_id).evaluate(document).list();
+	List list_city = Xsoup.compile(xpath_city).evaluate(document).list();
+	
+	Map map = new HashMap();
+	
+	for (int i = 0; i &lt;list_id.size(); i++) {
+		map.put(list_id.get(i),list_city.get(i));
+	}
+	Object[] obj1= list_id.toArray();
+	Object[] obj2= list_city.toArray();
+	
+	String enkey = Xsoup.compile(enkey).evaluate(document).get();
+	String ishost = Xsoup.compile(ishost).evaluate(document).get();
+	String issubhost = Xsoup.compile(issubhost).evaluate(document).get();
+	String isipv6 = Xsoup.compile(isipv6).evaluate(document).get();
+	String checktype = Xsoup.compile(checktype).evaluate(document).get();
+	String slen = Xsoup.compile(slen).evaluate(document).get();
+	String ftype = Xsoup.compile(ftype).evaluate(document).get();
+	String enabled = Xsoup.compile(enabled).evaluate(document).get();
+	
+	vars.put(&quot;enkey&quot;,enkey);
+	vars.put(&quot;ishost&quot;,ishost);
+	vars.put(&quot;issubhost&quot;,issubhost);
+	vars.put(&quot;isipv6&quot;,isipv6);
+	vars.put(&quot;checktype&quot;,checktype);
+	vars.put(&quot;slen&quot;,slen);
+	vars.put(&quot;ftype&quot;,ftype);
+	vars.put(&quot;enabled&quot;,enabled);
+	vars.putObject(&quot;node_size&quot;,list_id.size());
+	vars.putObject(&quot;node_data&quot;,map);
+	String filename = &quot;E:/temp/2.csv&quot;;
+	
+	execParam(filename,StringUtils.join(obj1,&quot;,&quot;));
+	execParam(filename,StringUtils.join(obj2,&quot;,&quot;));
+
+	vars.putObject(&quot;data&quot;,new ArrayList());
+}
+
+
+public static void execParam(String filename,String data){
+
+	FileWriter writer;
+	
+	try {
+	
+		writer = new FileWriter(filename,true);
+		
+		writer.write(data+&quot;\n&quot;);
+		
+		writer.flush();
+		
+		writer.close();
+	
+	} catch (IOException e) {
+	
+		e.printStackTrace();
+	
+	}
+
+}
+
+xping();
+
+
+
+
+
+
+
+
+</stringProp>
+          </BeanShellPostProcessor>
+          <hashTree/>
+        </hashTree>
+        <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="调试取样器" enabled="true">
+          <boolProp name="displayJMeterProperties">false</boolProp>
+          <boolProp name="displayJMeterVariables">true</boolProp>
+          <boolProp name="displaySystemProperties">false</boolProp>
+        </DebugSampler>
+        <hashTree/>
+        <ForeachController guiclass="ForeachControlPanel" testclass="ForeachController" testname="ForEach控制器" enabled="true">
+          <stringProp name="ForeachController.inputVal">guid</stringProp>
+          <stringProp name="ForeachController.returnVal">guidv</stringProp>
+          <boolProp name="ForeachController.useSeparator">true</boolProp>
+          <stringProp name="ForeachController.startIndex">0</stringProp>
+          <stringProp name="ForeachController.endIndex">${slen}</stringProp>
+        </ForeachController>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP信息头管理器" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="获取ping值" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">guid=${guidv}&amp;host=${ip}&amp;ishost=${ishost}&amp;isipv6=${isipv6}&amp;encode=${enkey}&amp;checktype=${checktype}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">ping.chinaz.com</stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.protocol">https</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/iframe.ashx?t=ping</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="正则表达式提取器" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">resptime</stringProp>
+              <stringProp name="RegexExtractor.regex">responsetime:&apos;(.*)&apos;,ttl</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">-1</stringProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+            <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="BeanShell 后置处理程序" enabled="true">
+              <boolProp name="resetInterpreter">false</boolProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="script">
+
+import java.util.*;
+
+public static void yping(){
+	List data = (List)vars.getObject(&quot;data&quot;);
+	
+	String html = vars.get(&quot;resptime&quot;);
+
+	String node_size = vars.get(&quot;node_size&quot;);
+
+	log.info(html);
+
+	data.add(html);
+	
+	Integer ncb  = Integer.valueOf(node_size)-1;
+
+	vars.put(&quot;node_size&quot;,String.valueOf(ncb));
+}
+
+yping();</stringProp>
+            </BeanShellPostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="BeanShell 后置处理程序" enabled="true">
+          <boolProp name="resetInterpreter">false</boolProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="script">import java.util.*;
+import java.nio.charset.Charset;
+import java.io.*;
+import org.apache.commons.lang3.StringUtils;
+
+
+
+public static void zping(){
+	List data = (List)vars.getObject(&quot;data&quot;);
+	log.info(data+&quot;==============&quot;);
+	String filename = &quot;E:/temp/2.csv&quot;;
+	
+	execParam2(filename,StringUtils.join(data,&quot;,&quot;));
+}
+
+public static void execParam2(String filename,String data){
+
+	FileWriter writer;
+	
+	try {
+	
+		writer = new FileWriter(filename,true);
+		
+		writer.write(data+&quot;\n&quot;);
+		
+		writer.flush();
+		
+		writer.close();
+	
+	} catch (IOException e) {
+	
+		e.printStackTrace();
+	
+	}
+
+}
+
+zping();</stringProp>
+        </BeanShellPostProcessor>
+        <hashTree/>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="如果（If）控制器" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3(&quot;${node_size}&quot;!=&quot;130&quot;,)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree/>
+        <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="调试取样器" enabled="true">
+          <boolProp name="displayJMeterProperties">false</boolProp>
+          <boolProp name="displayJMeterVariables">true</boolProp>
+          <boolProp name="displaySystemProperties">false</boolProp>
+        </DebugSampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="察看结果树" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
